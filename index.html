@@ -1,0 +1,1528 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UNO Battle - Game Kartu Seru</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        
+        .card {
+            width: 100px;
+            height: 150px;
+            border-radius: 18px;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+            border: 2px solid #fff;
+            overflow: hidden;
+        }
+        
+        .card:hover {
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+        }
+        
+        .card-red { 
+            background: linear-gradient(145deg, #ff1744 0%, #d50000 50%, #b71c1c 100%);
+            color: white;
+        }
+        .card-blue { 
+            background: linear-gradient(145deg, #2196f3 0%, #1565c0 50%, #0d47a1 100%);
+            color: white;
+        }
+        .card-green { 
+            background: linear-gradient(145deg, #4caf50 0%, #2e7d32 50%, #1b5e20 100%);
+            color: white;
+        }
+        .card-yellow { 
+            background: linear-gradient(145deg, #ffeb3b 0%, #f57f17 50%, #e65100 100%);
+            color: #000 !important;
+        }
+        .card-wild { 
+            background: linear-gradient(45deg, #000 0%, #1a1a1a 25%, #000 50%, #1a1a1a 75%, #000 100%);
+            color: white !important;
+            position: relative;
+        }
+        
+        /* Dark side colors for UNO Flip */
+        .card-pink {
+            background: linear-gradient(145deg, #e91e63 0%, #ad1457 50%, #880e4f 100%);
+            color: white;
+        }
+        .card-teal {
+            background: linear-gradient(145deg, #009688 0%, #00695c 50%, #004d40 100%);
+            color: white;
+        }
+        .card-orange {
+            background: linear-gradient(145deg, #ff5722 0%, #d84315 50%, #bf360c 100%);
+            color: white;
+        }
+        .card-purple {
+            background: linear-gradient(145deg, #9c27b0 0%, #6a1b9a 50%, #4a148c 100%);
+            color: white;
+        }
+        
+        .card-wild::before {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            right: 3px;
+            bottom: 3px;
+            background: linear-gradient(45deg, #ff1744 0%, #2196f3 25%, #4caf50 50%, #ffeb3b 75%, #ff1744 100%);
+            border-radius: 16px;
+            z-index: -1;
+        }
+        
+        .card-wild::after {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            bottom: 15px;
+            background: 
+                linear-gradient(0deg, transparent 48%, #ff1744 48%, #ff1744 52%, transparent 52%),
+                linear-gradient(45deg, transparent 48%, #2196f3 48%, #2196f3 52%, transparent 52%),
+                linear-gradient(90deg, transparent 48%, #4caf50 48%, #4caf50 52%, transparent 52%),
+                linear-gradient(135deg, transparent 48%, #ffeb3b 48%, #ffeb3b 52%, transparent 52%);
+            border-radius: 12px;
+            opacity: 0.3;
+            z-index: 0;
+        }
+        
+        .card-content {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            color: inherit;
+            padding: 8px;
+        }
+        
+        .card-number {
+            font-size: 3.5rem;
+            font-weight: 900;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.8);
+            line-height: 1;
+            font-family: 'Arial Black', Arial, sans-serif;
+            -webkit-text-stroke: 2px rgba(0,0,0,0.3);
+        }
+        
+        .card-symbol {
+            font-size: 2.5rem;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.8);
+            line-height: 1;
+            font-weight: 900;
+            -webkit-text-stroke: 1px rgba(0,0,0,0.3);
+        }
+        
+        .card-wild-text {
+            font-size: 1.4rem;
+            font-weight: 900;
+            text-align: center;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.9);
+            -webkit-text-stroke: 1px rgba(0,0,0,0.5);
+        }
+        
+        .card-corners {
+            position: absolute;
+            font-size: 1rem;
+            font-weight: 900;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            -webkit-text-stroke: 1px rgba(0,0,0,0.3);
+        }
+        
+        .card-top-left {
+            top: 12px;
+            left: 12px;
+        }
+        
+        .card-bottom-right {
+            bottom: 12px;
+            right: 12px;
+            transform: rotate(180deg);
+        }
+        
+        .uno-logo {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255,255,255,0.9);
+            color: #333;
+            font-size: 0.7rem;
+            font-weight: 900;
+            padding: 2px 6px;
+            border-radius: 8px;
+            border: 1px solid rgba(0,0,0,0.2);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .card-center-white {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 50%;
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+            z-index: 1;
+        }
+        
+        .card-center-content {
+            color: inherit;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .game-area {
+            perspective: 1000px;
+        }
+        
+        .discard-pile {
+            width: 100px;
+            height: 150px;
+            border-radius: 18px;
+            border: 3px dashed rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .player-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .ai-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .flip-card {
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+        }
+        
+        .flip-card.flipped {
+            transform: rotateY(180deg);
+        }
+        
+        .card-back {
+            background: linear-gradient(145deg, #000 0%, #1a1a1a 50%, #000 100%);
+            border-radius: 18px;
+            backface-visibility: hidden;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid white;
+            overflow: hidden;
+        }
+        
+        .card-back::before {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            right: 3px;
+            bottom: 3px;
+            background: linear-gradient(45deg, #ff1744 0%, #2196f3 25%, #4caf50 50%, #ffeb3b 75%, #ff1744 100%);
+            border-radius: 16px;
+            z-index: 0;
+        }
+        
+        .card-back-content {
+            text-align: center;
+            color: white;
+            position: relative;
+            z-index: 1;
+            background: rgba(0,0,0,0.8);
+            padding: 8px 12px;
+            border-radius: 10px;
+        }
+        
+        .card-back-uno {
+            font-size: 2rem;
+            font-weight: 900;
+            margin-bottom: 2px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            -webkit-text-stroke: 1px rgba(255,255,255,0.3);
+        }
+        
+        .card-back-pattern {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0.1;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 10px,
+                rgba(255,255,255,0.1) 10px,
+                rgba(255,255,255,0.1) 20px
+            );
+        }
+        
+        .card-front {
+            transform: rotateY(180deg);
+            backface-visibility: hidden;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            border-radius: 18px;
+        }
+        
+        .score-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #e74c3c;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #ffeb3b;
+            border-radius: 50%;
+            animation: confetti-fall 3s ease-in-out;
+        }
+        
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-100px) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(500px) rotate(720deg);
+                opacity: 0;
+            }
+        }
+        
+        .slide-in {
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .card-glow {
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from {
+                box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+            }
+            to {
+                box-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
+            }
+        }
+        
+        .side-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        
+        .side-light {
+            background: linear-gradient(45deg, #fff, #f0f0f0);
+            color: #333;
+            border: 2px solid #ddd;
+        }
+        
+        .side-dark {
+            background: linear-gradient(45deg, #333, #000);
+            color: #fff;
+            border: 2px solid #666;
+        }
+        
+        .mode-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .mode-btn {
+            padding: 12px 24px;
+            border: 2px solid white;
+            border-radius: 12px;
+            background: transparent;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .mode-btn.active {
+            background: white;
+            color: #333;
+        }
+        
+        .mode-btn:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .mode-btn.active:hover {
+            background: rgba(255,255,255,0.9);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="side-indicator side-light" id="sideIndicator">
+        SISI TERANG
+    </div>
+    
+    <div id="app" class="w-full max-w-6xl mx-auto">
+        <!-- Dashboard Awal -->
+        <div id="dashboard" class="text-center slide-in">
+            <div class="mb-8">
+                <div class="w-32 h-32 mx-auto mb-6 bg-gradient-to-r from-red-500 to-blue-500 rounded-full flex items-center justify-content text-white text-4xl font-bold shadow-2xl">
+                    UNO
+                </div>
+                <h1 class="text-5xl font-bold text-white mb-4">UNO Battle</h1>
+                <p class="text-xl text-gray-200 mb-8">Hadapi tantangan melawan AI dalam permainan kartu legendaris!</p>
+            </div>
+            
+            <div class="bg-white/10 backdrop-blur-md rounded-2xl p-8 mb-8">
+                <h2 class="text-2xl font-semibold mb-6">Pilih Mode Permainan</h2>
+                <div class="mode-selector justify-center mb-6">
+                    <button class="mode-btn active" id="classicBtn" onclick="selectMode('classic')">
+                        UNO Classic
+                    </button>
+                    <button class="mode-btn" id="flipBtn" onclick="selectMode('flip')">
+                        UNO Flip
+                    </button>
+                </div>
+                
+                <div class="max-w-md mx-auto">
+                    <input 
+                        type="text" 
+                        id="playerName" 
+                        placeholder="Nama kamu..."
+                        class="w-full px-6 py-3 rounded-xl border-2 border-gray-300 focus:border-blue-500 focus:outline-none text-gray-800 mb-4"
+                        maxlength="15"
+                    >
+                    <button 
+                        onclick="startGame()"
+                        class="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-3 px-8 rounded-xl font-semibold hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-lg"
+                    >
+                        Mulai Bermain
+                    </button>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-blue-600/20 p-6 rounded-xl">
+                    <h3 class="text-lg font-semibold mb-2">Dua Mode Permainan</h3>
+                    <p class="text-gray-200">Classic dan Flip mode dengan mechanic berbeda</p>
+                </div>
+                <div class="bg-red-600/20 p-6 rounded-xl">
+                    <h3 class="text-lg font-semibold mb-2">Sistem Peringkat</h3>
+                    <p class="text-gray-200">Lihat peringkatmu setelah menyelesaikan permainan</p>
+                </div>
+                <div class="bg-green-600/20 p-6 rounded-xl">
+                    <h3 class="text-lg font-semibold mb-2">Responsif</h3>
+                    <p class="text-gray-200">Bermain di desktop ataupun mobile dengan lancar</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Area Permainan -->
+        <div id="gameArea" class="hidden">
+            <div class="flex justify-between items-center mb-8">
+                <div class="flex items-center space-x-4">
+                    <div class="player-avatar text-xl" id="playerAvatar">P</div>
+                    <div>
+                        <h3 id="playerNameDisplay" class="font-semibold">Pemain</h3>
+                        <p class="text-sm text-gray-300" id="playerScore">Kartu: 7</p>
+                    </div>
+                </div>
+                
+                <div class="text-center">
+                    <h2 class="text-2xl font-bold">UNO Battle</h2>
+                    <p class="text-sm text-gray-300" id="currentTurn">Giliran: Pemain</p>
+                    <p class="text-xs text-gray-400 mt-1" id="currentColorDisplay">Warna aktif: -</p>
+                    <p class="text-xs text-gray-400" id="gameModeDisplay">Mode: Classic</p>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <div>
+                        <h3 class="font-semibold text-right">AI Player</h3>
+                        <p class="text-sm text-gray-300 text-right" id="aiScore">Kartu: 7</p>
+                    </div>
+                    <div class="ai-avatar text-xl">AI</div>
+                </div>
+            </div>
+
+            <!-- Area Kartu AI -->
+            <div class="flex justify-center mb-8">
+                <div class="bg-gray-800/50 rounded-xl p-4">
+                    <h4 class="text-center mb-4 text-gray-300">Kartu AI</h4>
+                    <div class="flex flex-wrap justify-center gap-2" id="aiCards"></div>
+                </div>
+            </div>
+
+            <!-- Area Permainan Tengah -->
+            <div class="game-area flex justify-center items-center space-x-8 mb-8">
+                <div class="bg-gray-800/50 rounded-xl p-4 text-center">
+                    <h4 class="mb-4">Deck</h4>
+                    <div class="card flip-card" onclick="drawCard()">
+                        <div class="card-back">
+                            <div class="card-back-pattern"></div>
+                            <div class="card-back-content">
+                                <div class="card-back-uno">UNO</div>
+                                <div class="text-xs">BATTLE</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-800/50 rounded-xl p-4 text-center">
+                    <h4 class="mb-4">Kartu Terbuka</h4>
+                    <div class="discard-pile" id="discardPile">
+                        <div class="text-gray-500 text-sm">Kosong</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kartu Pemain -->
+            <div class="bg-gray-900/50 rounded-xl p-6">
+                <h4 class="text-center mb-6 text-gray-300">Kartu Kamu</h4>
+                <div class="flex flex-wrap justify-center gap-3" id="playerCards"></div>
+            </div>
+
+            <!-- Tombol Aksi -->
+            <div class="flex justify-center space-x-4 mt-6">
+                <button 
+                    id="unoButton"
+                    onclick="callUno()"
+                    class="bg-yellow-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-yellow-600 transition-colors"
+                >
+                    UNO!
+                </button>
+                <button 
+                    onclick="drawCard()"
+                    class="bg-blue-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-600 transition-colors"
+                >
+                    Ambil Kartu
+                </button>
+            </div>
+        </div>
+
+        <!-- Layar Peringkat -->
+        <div id="leaderboard" class="hidden text-center">
+            <div class="bg-white/10 backdrop-blur-md rounded-2xl p-8 max-w-2xl mx-auto">
+                <h2 class="text-3xl font-bold mb-6">Hasil Permainan</h2>
+                <div class="mb-6 p-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl">
+                    <h3 class="text-xl font-semibold mb-2" id="winnerText"></h3>
+                    <p class="text-gray-200" id="scoreSummary"></p>
+                </div>
+                
+                <div class="bg-gray-800/50 rounded-xl p-6 mb-6">
+                    <h4 class="text-xl font-semibold mb-4">Peringkat</h4>
+                    <div id="rankingList" class="space-y-3"></div>
+                </div>
+                
+                <div class="flex space-x-4 justify-center">
+                    <button 
+                        onclick="playAgain()"
+                        class="bg-green-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-600 transition-colors"
+                    >
+                        Main Lagi
+                    </button>
+                    <button 
+                        onclick="backToDashboard()"
+                        class="bg-gray-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-600 transition-colors"
+                    >
+                        Kembali ke Dashboard
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Color Picker Modal -->
+        <div id="colorPicker" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-2xl p-8 max-w-md mx-4">
+                <h3 class="text-2xl font-bold text-gray-800 mb-6 text-center">Pilih Warna</h3>
+                <div class="grid grid-cols-2 gap-4" id="colorPickerGrid">
+                    <!-- Color buttons will be dynamically generated based on current side -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let gameState = {
+            players: [],
+            deck: [],
+            discardPile: [],
+            currentPlayerIndex: 0,
+            currentColor: null,
+            gameStarted: false,
+            unoCalled: false,
+            waitingForColorChoice: false,
+            gameMode: 'classic',
+            currentSide: 'light' // For UNO Flip
+        };
+
+        const CLASSIC_COLORS = ['red', 'blue', 'green', 'yellow'];
+        const FLIP_LIGHT_COLORS = ['red', 'blue', 'green', 'yellow'];
+        const FLIP_DARK_COLORS = ['pink', 'teal', 'orange', 'purple'];
+        
+        const VALUES = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'skip', 'reverse', 'draw2'];
+        const FLIP_LIGHT_VALUES = ['1', '2', '3', '4', '5', 'skip', 'reverse', 'draw1'];
+        const FLIP_DARK_VALUES = ['1', '2', '3', '4', '5', 'skip_everyone', 'reverse', 'draw5'];
+        
+        const SPECIAL_CARDS = ['wild', 'wild_draw4'];
+        const FLIP_SPECIAL_CARDS = ['wild', 'wild_draw2', 'flip'];
+
+        function selectMode(mode) {
+            gameState.gameMode = mode;
+            
+            // Update button styles
+            document.getElementById('classicBtn').classList.toggle('active', mode === 'classic');
+            document.getElementById('flipBtn').classList.toggle('active', mode === 'flip');
+        }
+
+        function updateSideIndicator() {
+            const indicator = document.getElementById('sideIndicator');
+            if (gameState.gameMode === 'flip') {
+                indicator.classList.remove('hidden');
+                if (gameState.currentSide === 'light') {
+                    indicator.textContent = 'SISI TERANG';
+                    indicator.className = 'side-indicator side-light';
+                } else {
+                    indicator.textContent = 'SISI GELAP';
+                    indicator.className = 'side-indicator side-dark';
+                }
+            } else {
+                indicator.classList.add('hidden');
+            }
+        }
+
+        function getCurrentColors() {
+            if (gameState.gameMode === 'classic') {
+                return CLASSIC_COLORS;
+            } else {
+                return gameState.currentSide === 'light' ? FLIP_LIGHT_COLORS : FLIP_DARK_COLORS;
+            }
+        }
+
+        function getCurrentValues() {
+            if (gameState.gameMode === 'classic') {
+                return VALUES;
+            } else {
+                return gameState.currentSide === 'light' ? FLIP_LIGHT_VALUES : FLIP_DARK_VALUES;
+            }
+        }
+
+        function getCurrentSpecialCards() {
+            if (gameState.gameMode === 'classic') {
+                return SPECIAL_CARDS;
+            } else {
+                return FLIP_SPECIAL_CARDS;
+            }
+        }
+
+        function createDeck() {
+            let deck = [];
+            const colors = getCurrentColors();
+            const values = getCurrentValues();
+            const specialCards = getCurrentSpecialCards();
+            
+            if (gameState.gameMode === 'classic') {
+                // Classic UNO deck
+                colors.forEach(color => {
+                    values.forEach(value => {
+                        if (value === '0') {
+                            deck.push({ type: 'number', color, value, score: parseInt(value), side: 'light' });
+                        } else {
+                            const cardType = ['skip', 'reverse', 'draw2'].includes(value) ? 'action' : 'number';
+                            const score = ['skip', 'reverse', 'draw2'].includes(value) ? 20 : parseInt(value);
+                            deck.push({ type: cardType, color, value, score, side: 'light' });
+                            deck.push({ type: cardType, color, value, score, side: 'light' });
+                        }
+                    });
+                });
+                
+                // Wild cards
+                for (let i = 0; i < 4; i++) {
+                    deck.push({ type: 'wild', color: 'wild', value: 'wild', score: 50, side: 'light' });
+                    deck.push({ type: 'wild', color: 'wild', value: 'wild_draw4', score: 50, side: 'light' });
+                }
+            } else {
+                // UNO Flip deck - create double-sided cards
+                colors.forEach(color => {
+                    values.forEach(value => {
+                        const cardType = ['skip', 'reverse', 'draw1'].includes(value) ? 'action' : 'number';
+                        const score = ['skip', 'reverse', 'draw1'].includes(value) ? 20 : parseInt(value);
+                        
+                        // Create light side
+                        const lightCard = { 
+                            type: cardType, 
+                            color, 
+                            value, 
+                            score, 
+                            side: 'light',
+                            flipSide: null 
+                        };
+                        
+                        // Create corresponding dark side
+                        const darkColor = FLIP_DARK_COLORS[FLIP_LIGHT_COLORS.indexOf(color)];
+                        const darkValue = value === 'draw1' ? 'draw5' : (value === 'skip' ? 'skip_everyone' : value);
+                        const darkScore = ['skip_everyone', 'reverse', 'draw5'].includes(darkValue) ? 20 : parseInt(darkValue);
+                        
+                        const darkCard = {
+                            type: cardType,
+                            color: darkColor,
+                            value: darkValue,
+                            score: darkScore,
+                            side: 'dark',
+                            flipSide: null
+                        };
+                        
+                        // Link the cards
+                        lightCard.flipSide = darkCard;
+                        darkCard.flipSide = lightCard;
+                        
+                        deck.push(lightCard);
+                        deck.push(lightCard); // Two of each card
+                    });
+                });
+                
+                // Wild cards for Flip
+                for (let i = 0; i < 4; i++) {
+                    const lightWild = { type: 'wild', color: 'wild', value: 'wild', score: 40, side: 'light', flipSide: null };
+                    const darkWild = { type: 'wild', color: 'wild', value: 'wild_draw_color', score: 60, side: 'dark', flipSide: null };
+                    lightWild.flipSide = darkWild;
+                    darkWild.flipSide = lightWild;
+                    deck.push(lightWild);
+                    
+                    const lightDraw2 = { type: 'wild', color: 'wild', value: 'wild_draw2', score: 50, side: 'light', flipSide: null };
+                    const darkDrawColor = { type: 'wild', color: 'wild', value: 'wild_draw_color', score: 60, side: 'dark', flipSide: null };
+                    lightDraw2.flipSide = darkDrawColor;
+                    darkDrawColor.flipSide = lightDraw2;
+                    deck.push(lightDraw2);
+                }
+                
+                // Flip cards
+                for (let i = 0; i < 4; i++) {
+                    const flipCard = { type: 'flip', color: 'wild', value: 'flip', score: 20, side: 'light', flipSide: null };
+                    deck.push(flipCard);
+                }
+            }
+            
+            return shuffleArray(deck);
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function flipAllCards() {
+            gameState.currentSide = gameState.currentSide === 'light' ? 'dark' : 'light';
+            
+            // Flip all cards in players' hands
+            gameState.players.forEach(player => {
+                player.cards = player.cards.map(card => {
+                    if (card.flipSide && gameState.gameMode === 'flip') {
+                        return card.flipSide;
+                    }
+                    return card;
+                });
+            });
+            
+            // Flip cards in discard pile
+            gameState.discardPile = gameState.discardPile.map(card => {
+                if (card.flipSide && gameState.gameMode === 'flip') {
+                    return card.flipSide;
+                }
+                return card;
+            });
+            
+            // Update current color to match new side
+            const topCard = gameState.discardPile[gameState.discardPile.length - 1];
+            if (topCard && topCard.color !== 'wild') {
+                gameState.currentColor = topCard.color;
+            }
+            
+            updateSideIndicator();
+            alert(`Kartu dibalik ke sisi ${gameState.currentSide === 'light' ? 'terang' : 'gelap'}!`);
+        }
+
+        function getActiveCard(card) {
+            // For flip mode, return the card side that matches current side
+            if (gameState.gameMode === 'flip' && card.flipSide) {
+                return card.side === gameState.currentSide ? card : card.flipSide;
+            }
+            return card;
+        }
+
+        function createCardElement(card, isBack = false) {
+            const activeCard = getActiveCard(card);
+            const cardDiv = document.createElement('div');
+            cardDiv.className = `card card-${activeCard.color}`;
+            
+            if (isBack) {
+                cardDiv.innerHTML = `
+                    <div class="card-back">
+                        <div class="card-back-pattern"></div>
+                        <div class="card-back-content">
+                            <div class="card-back-uno">UNO</div>
+                            <div class="text-xs">BATTLE</div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                const displayValue = getDisplayValue(activeCard);
+                const isNumber = !isNaN(parseInt(activeCard.value));
+                const isWild = activeCard.color === 'wild';
+                
+                if (isWild) {
+                    cardDiv.innerHTML = `
+                        <div class="card-content">
+                            <div class="card-corners card-top-left">${displayValue}</div>
+                            <div class="card-corners card-bottom-right">${displayValue}</div>
+                            <div class="card-center-white">
+                                <div class="card-center-content">
+                                    <div class="card-wild-text" style="color: #333;">
+                                        ${displayValue}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="uno-logo">UNO</div>
+                        </div>
+                    `;
+                } else {
+                    cardDiv.innerHTML = `
+                        <div class="card-content">
+                            <div class="card-corners card-top-left">${displayValue}</div>
+                            <div class="card-corners card-bottom-right">${displayValue}</div>
+                            <div class="card-center-white">
+                                <div class="card-center-content" style="color: ${activeCard.color === 'yellow' ? '#333' : activeCard.color};">
+                                    <div class="${isNumber ? 'card-number' : 'card-symbol'}">
+                                        ${displayValue}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="uno-logo">UNO</div>
+                        </div>
+                    `;
+                }
+            }
+            
+            return cardDiv;
+        }
+
+        function getDisplayValue(card) {
+            const symbols = {
+                'skip': '⊘',
+                'reverse': '⇄', 
+                'draw2': '+2',
+                'draw1': '+1',
+                'draw5': '+5',
+                'skip_everyone': '⊘⊘',
+                'wild': 'WILD',
+                'wild_draw4': 'WILD\n+4',
+                'wild_draw2': 'WILD\n+2',
+                'wild_draw_color': 'WILD\nCOLOR',
+                'flip': 'FLIP'
+            };
+            return symbols[card.value] || card.value;
+        }
+
+        function startGame() {
+            const playerName = document.getElementById('playerName').value.trim();
+            if (!playerName) {
+                alert('Silakan masukkan nama kamu terlebih dahulu!');
+                return;
+            }
+
+            // Reset current side for new game
+            gameState.currentSide = 'light';
+            
+            // Setup pemain
+            gameState.players = [
+                { name: playerName, cards: [], score: 0, totalScore: 0 },
+                { name: 'AI Player', cards: [], score: 0, totalScore: 0, isAI: true }
+            ];
+
+            // Setup deck dan kartu awal
+            gameState.deck = createDeck();
+            gameState.discardPile = [];
+            gameState.currentPlayerIndex = 0;
+            gameState.unoCalled = false;
+            gameState.waitingForColorChoice = false;
+
+            // Bagikan 7 kartu untuk setiap pemain
+            gameState.players.forEach(player => {
+                player.cards = gameState.deck.splice(0, 7);
+            });
+
+            // Kartu pertama ke discard pile (tidak boleh wild card atau flip card)
+            let firstCard;
+            do {
+                firstCard = gameState.deck.pop();
+            } while (firstCard.type === 'wild' || firstCard.value === 'flip');
+            
+            gameState.discardPile.push(firstCard);
+            gameState.currentColor = firstCard.color;
+
+            // Update UI
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('gameArea').classList.remove('hidden');
+            document.getElementById('playerNameDisplay').textContent = playerName;
+            document.getElementById('playerAvatar').textContent = playerName.charAt(0).toUpperCase();
+            document.getElementById('gameModeDisplay').textContent = `Mode: ${gameState.gameMode === 'classic' ? 'Classic' : 'Flip'}`;
+
+            updateSideIndicator();
+            updateGameUI();
+            gameState.gameStarted = true;
+        }
+
+        function updateGameUI() {
+            // Update kartu pemain
+            const playerCardsDiv = document.getElementById('playerCards');
+            playerCardsDiv.innerHTML = '';
+            
+            gameState.players[0].cards.forEach((card, index) => {
+                const cardElement = createCardElement(card);
+                const topCard = gameState.discardPile[gameState.discardPile.length - 1];
+                
+                // Tambahkan glow effect jika kartu bisa dimainkan
+                if (isValidMove(getActiveCard(card), getActiveCard(topCard))) {
+                    cardElement.classList.add('card-glow');
+                }
+                
+                cardElement.onclick = () => playCard(index);
+                playerCardsDiv.appendChild(cardElement);
+            });
+
+            // Update kartu AI (dibalik)
+            const aiCardsDiv = document.getElementById('aiCards');
+            aiCardsDiv.innerHTML = '';
+            
+            gameState.players[1].cards.forEach(() => {
+                const cardElement = createCardElement({color: 'red', value: '0'}, true);
+                aiCardsDiv.appendChild(cardElement);
+            });
+
+            // Update discard pile
+            const discardPileDiv = document.getElementById('discardPile');
+            if (gameState.discardPile.length > 0) {
+                const topCard = gameState.discardPile[gameState.discardPile.length - 1];
+                discardPileDiv.innerHTML = '';
+                const cardElement = createCardElement(topCard);
+                discardPileDiv.appendChild(cardElement);
+            }
+
+            // Update score, giliran, dan warna aktif
+            document.getElementById('playerScore').textContent = `Kartu: ${gameState.players[0].cards.length}`;
+            document.getElementById('aiScore').textContent = `Kartu: ${gameState.players[1].cards.length}`;
+            document.getElementById('currentTurn').textContent = `Giliran: ${gameState.players[gameState.currentPlayerIndex].name}`;
+            
+            const colorMap = {
+                'red': '🔴 Merah',
+                'blue': '🔵 Biru', 
+                'green': '🟢 Hijau',
+                'yellow': '🟡 Kuning',
+                'pink': '🩷 Pink',
+                'teal': '🔷 Teal',
+                'orange': '🟠 Orange', 
+                'purple': '🟣 Ungu',
+                'wild': '🌈 Wild'
+            };
+            document.getElementById('currentColorDisplay').textContent = `Warna aktif: ${colorMap[gameState.currentColor] || gameState.currentColor}`;
+
+            // Auto-play untuk AI
+            if (gameState.players[gameState.currentPlayerIndex].isAI && !gameState.waitingForColorChoice) {
+                setTimeout(aiPlay, 1500);
+            }
+        }
+
+        function playCard(cardIndex) {
+            if (gameState.currentPlayerIndex !== 0 || gameState.waitingForColorChoice) return;
+            
+            const player = gameState.players[0];
+            const card = player.cards[cardIndex];
+            const activeCard = getActiveCard(card);
+            const topCard = getActiveCard(gameState.discardPile[gameState.discardPile.length - 1]);
+
+            if (isValidMove(activeCard, topCard)) {
+                // Pindahkan kartu ke discard pile
+                player.cards.splice(cardIndex, 1);
+                gameState.discardPile.push(activeCard);
+                
+                if (activeCard.color === 'wild') {
+                    // Pemain harus memilih warna untuk wild card
+                    gameState.waitingForColorChoice = true;
+                    showColorPicker();
+                    return;
+                } else {
+                    gameState.currentColor = activeCard.color;
+                }
+
+                // Handle efek kartu khusus
+                handleCardEffect(activeCard);
+
+                // Cek jika pemain menang
+                if (player.cards.length === 0) {
+                    endGame();
+                    return;
+                }
+
+                // Giliran berikutnya
+                nextTurn();
+                updateGameUI();
+            } else {
+                alert('Kartu tidak valid! Pilih kartu dengan warna atau nilai yang sama dengan kartu terbuka.');
+            }
+        }
+
+        function showColorPicker() {
+            const colorPickerGrid = document.getElementById('colorPickerGrid');
+            const colors = getCurrentColors();
+            
+            colorPickerGrid.innerHTML = '';
+            
+            const colorNames = {
+                'red': '🔴 Merah',
+                'blue': '🔵 Biru',
+                'green': '🟢 Hijau', 
+                'yellow': '🟡 Kuning',
+                'pink': '🩷 Pink',
+                'teal': '🔷 Teal',
+                'orange': '🟠 Orange',
+                'purple': '🟣 Ungu'
+            };
+            
+            colors.forEach(color => {
+                const button = document.createElement('button');
+                button.onclick = () => selectColor(color);
+                button.className = `p-6 rounded-xl bg-${color}-500 text-white font-semibold hover:bg-${color}-600 transition-colors`;
+                button.textContent = colorNames[color];
+                colorPickerGrid.appendChild(button);
+            });
+            
+            document.getElementById('colorPicker').classList.remove('hidden');
+        }
+
+        function selectColor(color) {
+            gameState.currentColor = color;
+            gameState.waitingForColorChoice = false;
+            document.getElementById('colorPicker').classList.add('hidden');
+            
+            // Handle efek kartu wild setelah warna dipilih
+            const lastCard = gameState.discardPile[gameState.discardPile.length - 1];
+            handleCardEffect(lastCard);
+
+            // Cek jika pemain menang
+            if (gameState.players[0].cards.length === 0) {
+                endGame();
+                return;
+            }
+
+            // Giliran berikutnya
+            nextTurn();
+            updateGameUI();
+        }
+
+        function isValidMove(card, topCard) {
+            return card.color === 'wild' || 
+                   card.color === gameState.currentColor || 
+                   card.value === topCard.value;
+        }
+
+        function handleCardEffect(card) {
+            switch (card.value) {
+                case 'skip':
+                    nextTurn(); // Skip giliran berikutnya
+                    break;
+                case 'skip_everyone':
+                    // Skip semua pemain lain (dalam 2 pemain, sama dengan skip biasa)
+                    nextTurn();
+                    break;
+                case 'reverse':
+                    // Dalam 2 pemain, reverse sama dengan skip
+                    nextTurn();
+                    break;
+                case 'draw2':
+                    const nextPlayer = gameState.players[(gameState.currentPlayerIndex + 1) % 2];
+                    drawCardsForPlayer(nextPlayer, 2);
+                    break;
+                case 'draw1':
+                    const nextPlayer1 = gameState.players[(gameState.currentPlayerIndex + 1) % 2];
+                    drawCardsForPlayer(nextPlayer1, 1);
+                    break;
+                case 'draw5':
+                    const nextPlayer5 = gameState.players[(gameState.currentPlayerIndex + 1) % 2];
+                    drawCardsForPlayer(nextPlayer5, 5);
+                    break;
+                case 'wild_draw4':
+                    const nextPlayer4 = gameState.players[(gameState.currentPlayerIndex + 1) % 2];
+                    drawCardsForPlayer(nextPlayer4, 4);
+                    break;
+                case 'wild_draw2':
+                    const nextPlayer2 = gameState.players[(gameState.currentPlayerIndex + 1) % 2];
+                    drawCardsForPlayer(nextPlayer2, 2);
+                    break;
+                case 'wild_draw_color':
+                    // Draw until you get a card of the chosen color
+                    const targetPlayer = gameState.players[(gameState.currentPlayerIndex + 1) % 2];
+                    let drawnCards = 0;
+                    let foundColor = false;
+                    while (!foundColor && drawnCards < 10) { // Safety limit
+                        const drawnCard = drawCardFromDeck();
+                        if (drawnCard) {
+                            targetPlayer.cards.push(drawnCard);
+                            drawnCards++;
+                            const activeDrawnCard = getActiveCard(drawnCard);
+                            if (activeDrawnCard.color === gameState.currentColor) {
+                                foundColor = true;
+                            }
+                        } else {
+                            break;
+                        }
+                    }
+                    break;
+                case 'flip':
+                    if (gameState.gameMode === 'flip') {
+                        flipAllCards();
+                    }
+                    break;
+            }
+        }
+
+        function drawCard() {
+            if (gameState.currentPlayerIndex !== 0 || gameState.waitingForColorChoice) return;
+            
+            const player = gameState.players[0];
+            const drawnCard = drawCardFromDeck();
+            
+            if (drawnCard) {
+                player.cards.push(drawnCard);
+                
+                // Jika kartu yang diambil bisa dimainkan, tanya pemain
+                const topCard = getActiveCard(gameState.discardPile[gameState.discardPile.length - 1]);
+                const activeDrawnCard = getActiveCard(drawnCard);
+                
+                if (isValidMove(activeDrawnCard, topCard)) {
+                    if (confirm('Kartu yang kamu ambil bisa dimainkan. Ingin mainkan sekarang?')) {
+                        const cardIndex = player.cards.length - 1;
+                        playCard(cardIndex);
+                        return;
+                    }
+                }
+            }
+            
+            nextTurn();
+            updateGameUI();
+        }
+
+        function drawCardFromDeck() {
+            if (gameState.deck.length === 0) {
+                // Reshuffle discard pile kecuali kartu teratas
+                if (gameState.discardPile.length <= 1) return null;
+                
+                const topCard = gameState.discardPile.pop();
+                gameState.deck = shuffleArray([...gameState.discardPile]);
+                gameState.discardPile = [topCard];
+            }
+            
+            return gameState.deck.pop();
+        }
+
+        function drawCardsForPlayer(player, count) {
+            for (let i = 0; i < count; i++) {
+                const drawnCard = drawCardFromDeck();
+                if (drawnCard) {
+                    player.cards.push(drawnCard);
+                } else {
+                    break; // No more cards available
+                }
+            }
+        }
+
+        function nextTurn() {
+            gameState.currentPlayerIndex = (gameState.currentPlayerIndex + 1) % 2;
+            gameState.unoCalled = false;
+        }
+
+        function callUno() {
+            const player = gameState.players[0];
+            if (player.cards.length === 1) {
+                // Pemain berhasil panggil UNO
+                gameState.unoCalled = true;
+                alert('UNO! Kamu hampir menang!');
+            } else if (player.cards.length === 2) {
+                // Pemain panggil UNO terlalu cepat
+                alert('Kamu masih punya 2 kartu! Panggil UNO ketika kamu hanya punya 1 kartu tersisa.');
+            } else {
+                // Pemain salah panggil UNO, harus ambil 2 kartu
+                alert('Kamu masih punya lebih dari 2 kartu! Ambil 2 kartu sebagai hukuman.');
+                drawCardsForPlayer(player, 2);
+                updateGameUI();
+            }
+        }
+
+        function aiPlay() {
+            const ai = gameState.players[1];
+            const topCard = getActiveCard(gameState.discardPile[gameState.discardPile.length - 1]);
+            
+            // Cari kartu yang bisa dimainkan
+            let playableCards = [];
+            for (let i = 0; i < ai.cards.length; i++) {
+                const activeCard = getActiveCard(ai.cards[i]);
+                if (isValidMove(activeCard, topCard)) {
+                    playableCards.push({card: ai.cards[i], activeCard, index: i});
+                }
+            }
+            
+            if (playableCards.length > 0) {
+                // AI memilih kartu berdasarkan strategi sederhana
+                let chosenCard = null;
+                
+                // Prioritas 1: Kartu dengan nilai sama
+                const sameValue = playableCards.find(item => item.activeCard.value === topCard.value && item.activeCard.color !== 'wild');
+                if (sameValue) {
+                    chosenCard = sameValue;
+                } else {
+                    // Prioritas 2: Kartu dengan warna sama
+                    const sameColor = playableCards.find(item => item.activeCard.color === gameState.currentColor);
+                    if (sameColor) {
+                        chosenCard = sameColor;
+                    } else {
+                        // Prioritas 3: Kartu wild (sebagai pilihan terakhir)
+                        chosenCard = playableCards[0];
+                    }
+                }
+                
+                // Mainkan kartu
+                const card = chosenCard.card;
+                const activeCard = chosenCard.activeCard;
+                ai.cards.splice(chosenCard.index, 1);
+                gameState.discardPile.push(activeCard);
+                
+                // Handle wild card (AI pilih warna berdasarkan kartu yang dimiliki)
+                if (activeCard.color === 'wild') {
+                    const colors = getCurrentColors();
+                    const colorCounts = {};
+                    colors.forEach(color => colorCounts[color] = 0);
+                    
+                    ai.cards.forEach(c => {
+                        const activeC = getActiveCard(c);
+                        if (activeC.color !== 'wild' && colorCounts[activeC.color] !== undefined) {
+                            colorCounts[activeC.color]++;
+                        }
+                    });
+                    
+                    // Pilih warna yang paling banyak dimiliki AI
+                    let bestColor = colors[0];
+                    let maxCount = colorCounts[bestColor];
+                    Object.entries(colorCounts).forEach(([color, count]) => {
+                        if (count > maxCount) {
+                            bestColor = color;
+                            maxCount = count;
+                        }
+                    });
+                    
+                    gameState.currentColor = bestColor;
+                } else {
+                    gameState.currentColor = activeCard.color;
+                }
+                
+                // Handle efek kartu
+                handleCardEffect(activeCard);
+                
+                // AI panggil UNO jika tinggal 1 kartu
+                if (ai.cards.length === 1) {
+                    setTimeout(() => {
+                        alert('AI Player: UNO!');
+                    }, 500);
+                }
+                
+                // Cek jika AI menang
+                if (ai.cards.length === 0) {
+                    setTimeout(() => {
+                        endGame();
+                    }, 1000);
+                    return;
+                }
+            } else {
+                // Ambil kartu
+                const drawnCard = drawCardFromDeck();
+                if (drawnCard) {
+                    ai.cards.push(drawnCard);
+                    
+                    // AI coba mainkan kartu yang baru diambil jika bisa
+                    const newTopCard = getActiveCard(gameState.discardPile[gameState.discardPile.length - 1]);
+                    const activeDrawnCard = getActiveCard(drawnCard);
+                    
+                    if (isValidMove(activeDrawnCard, newTopCard)) {
+                        // Mainkan kartu yang baru diambil
+                        ai.cards.pop(); // Hapus dari tangan
+                        gameState.discardPile.push(activeDrawnCard);
+                        
+                        if (activeDrawnCard.color === 'wild') {
+                            // Pilih warna seperti sebelumnya
+                            const colors = getCurrentColors();
+                            const colorCounts = {};
+                            colors.forEach(color => colorCounts[color] = 0);
+                            
+                            ai.cards.forEach(c => {
+                                const activeC = getActiveCard(c);
+                                if (activeC.color !== 'wild' && colorCounts[activeC.color] !== undefined) {
+                                    colorCounts[activeC.color]++;
+                                }
+                            });
+                            
+                            let bestColor = colors[0];
+                            let maxCount = colorCounts[bestColor];
+                            Object.entries(colorCounts).forEach(([color, count]) => {
+                                if (count > maxCount) {
+                                    bestColor = color;
+                                    maxCount = count;
+                                }
+                            });
+                            
+                            gameState.currentColor = bestColor;
+                        } else {
+                            gameState.currentColor = activeDrawnCard.color;
+                        }
+                        
+                        handleCardEffect(activeDrawnCard);
+                        
+                        if (ai.cards.length === 0) {
+                            setTimeout(() => {
+                                endGame();
+                            }, 1000);
+                            return;
+                        }
+                    }
+                }
+            }
+            
+            nextTurn();
+            updateGameUI();
+        }
+
+        function endGame() {
+            const winner = gameState.players.find(p => p.cards.length === 0);
+            const loser = gameState.players.find(p => p.cards.length > 0);
+            
+            // Hitung skor berdasarkan kartu yang tersisa
+            let totalScore = 0;
+            gameState.players.forEach(player => {
+                if (player.cards.length > 0) {
+                    player.cards.forEach(card => {
+                        const activeCard = getActiveCard(card);
+                        totalScore += activeCard.score;
+                    });
+                }
+            });
+            
+            winner.totalScore += totalScore;
+            
+            // Tampilkan layar hasil
+            document.getElementById('gameArea').classList.add('hidden');
+            document.getElementById('leaderboard').classList.remove('hidden');
+            
+            document.getElementById('winnerText').textContent = `${winner.name} Menang!`;
+            document.getElementById('scoreSummary').textContent = 
+                `Skor yang didapat: ${totalScore} poin | Total skor: ${winner.totalScore}`;
+            
+            // Tampilkan peringkat
+            const rankingList = document.getElementById('rankingList');
+            rankingList.innerHTML = '';
+            
+            // Sortir pemain berdasarkan total skor
+            const sortedPlayers = [...gameState.players].sort((a, b) => b.totalScore - a.totalScore);
+            
+            sortedPlayers.forEach((player, index) => {
+                const rankDiv = document.createElement('div');
+                rankDiv.className = `flex justify-between items-center p-3 rounded-lg ${index === 0 ? 'bg-yellow-500/20' : 'bg-gray-700/50'}`;
+                rankDiv.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <span class="font-bold text-xl">${index + 1}.</span>
+                        <span>${player.name}</span>
+                        ${index === 0 ? '<span class="text-yellow-500">👑</span>' : ''}
+                    </div>
+                    <span class="font-semibold">${player.totalScore} poin</span>
+                `;
+                rankingList.appendChild(rankDiv);
+            });
+            
+            // Buat efek confetti
+            createConfetti();
+        }
+
+        function createConfetti() {
+            const app = document.getElementById('app');
+            const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7', '#dda0dd'];
+            
+            for (let i = 0; i < 100; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.animationDelay = Math.random() * 3 + 's';
+                confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                app.appendChild(confetti);
+                
+                setTimeout(() => {
+                    confetti.remove();
+                }, 5000);
+            }
+        }
+
+        function playAgain() {
+            // Reset game state tetapi pertahankan total skor
+            gameState.deck = createDeck();
+            gameState.discardPile = [];
+            gameState.currentPlayerIndex = 0;
+            gameState.unoCalled = false;
+            gameState.waitingForColorChoice = false;
+            gameState.currentSide = 'light'; // Reset to light side
+            
+            // Bagikan kartu baru
+            gameState.players.forEach(player => {
+                player.cards = gameState.deck.splice(0, 7);
+            });
+            
+            // Kartu pertama ke discard pile
+            let firstCard;
+            do {
+                firstCard = gameState.deck.pop();
+            } while (firstCard.type === 'wild' || firstCard.value === 'flip');
+            
+            gameState.discardPile.push(firstCard);
+            gameState.currentColor = firstCard.color;
+            
+            // Kembali ke layar game
+            document.getElementById('leaderboard').classList.add('hidden');
+            document.getElementById('gameArea').classList.remove('hidden');
+            
+            updateSideIndicator();
+            updateGameUI();
+        }
+
+        function backToDashboard() {
+            // Reset semua state
+            gameState = {
+                players: [],
+                deck: [],
+                discardPile: [],
+                currentPlayerIndex: 0,
+                currentColor: null,
+                gameStarted: false,
+                unoCalled: false,
+                waitingForColorChoice: false,
+                gameMode: 'classic',
+                currentSide: 'light'
+            };
+            
+            document.getElementById('leaderboard').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+            document.getElementById('playerName').value = '';
+            updateSideIndicator();
+        }
+
+        // Event listener untuk input enter
+        document.getElementById('playerName').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                startGame();
+            }
+        });
+
+        // Close color picker dengan ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && !document.getElementById('colorPicker').classList.contains('hidden')) {
+                // Auto-pilih warna pertama jika pemain tidak memilih
+                const colors = getCurrentColors();
+                selectColor(colors[0]);
+            }
+        });
+
+        // Initialize side indicator as hidden
+        updateSideIndicator();
+    </script>
+</body>
+</html>
